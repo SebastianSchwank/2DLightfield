@@ -1,16 +1,10 @@
 #include "rmath.h"
 
 
-const double pi = 3.14159265;
 const double noInters = -2.0;
 
-int inside(double probe,double start,double end)
-{
-    if(probe > start && probe < end)
-    {
-        return 1;
-    }
-    return 0;
+int sgn(int x){
+  return (x > 0) ? 1 : (x < 0) ? -1 : 0;
 }
 
 double radToDeg(double Rad)
@@ -25,18 +19,20 @@ double degToRad(double Deg)
 
 double normalize(double alpha)
 {
-    if(alpha < 2*pi && alpha > 0)
+    if(alpha < 360 && alpha > 0)
     {
         return alpha;
     }
     if(alpha < 0)
     {
-        return normalize(alpha + 2*pi);
+        return normalize(alpha + 360);
     }
-    if(alpha > 2*pi)
+    if(alpha > 360)
     {
-        return normalize(alpha - 2*pi);
+        return normalize(alpha - 360);
     }
+
+    return alpha;
 }
 
 int inBounds(Coord pos,double xb1,double yb1,double xb2,double yb2)

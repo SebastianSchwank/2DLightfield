@@ -6,8 +6,8 @@
 
 #include <QGraphicsScene>
 #include "data.h"
-//#include "quadtree.h"
+#include "quadtree.h"
 
-void viewpreview(data Daten,QGraphicsScene *preview,long scale);
+void viewpreview(data Daten,QuadTree *QTree, QGraphicsScene *preview,long scale);
 
 #endif // PREVIEW_H

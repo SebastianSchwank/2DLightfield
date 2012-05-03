@@ -7,133 +7,185 @@ const double VeryBig = 2e10;
 const double noInters = -2.0;
 const double pi = 3.14159265;
 
-raytracer::raytracer(data *Daten,unsigned long scale)
+raytracer::raytracer(data *Daten,unsigned long scale,QuadTree *QTree)
 {
     _Daten = Daten;
     _scale = scale;
+    _QTree = QTree;
 }
 
-renderPixel raytracer::renderPix(int x,int y)
+renderPixel raytracer::renderPix(int x,int y, QVector<QVector<renderPixel> > *RgbiImage)
 {
     double xp,yp,alpha;
-
+/*
+    x = (rand() % (_scale -50)) +20;
+    y = (rand() % (_scale -50)) +20;
+*/
     xp = (double)x/(_scale/2) - 1.0;
     yp = -((double)y/(_scale/2) - 1.0);
 
-    return trace(xp,yp);
+    alpha = (double)(qrand() % 3600) / 10;
+
+    return trace(xp,yp,alpha,RgbiImage);
 }
 
-renderPixel raytracer::trace(double x,double y)
+renderPixel raytracer::trace(double x,double y,double alpha,QVector< QVector<renderPixel> > *RgbiImage)
 {
     Coord Pos;
 
     Pos.x = x;
     Pos.y = y;
-
-    covering.clear();
-    for(int i = 0; i < _Daten->getSize(); i++)
+/*
+    // Calculate EVERY intersection of the Ray with the Edges
+    for(long i = 0; i < _Daten->getSize(); i++)
     {
-        getCovering(Pos,i);
+        InterSections.append(InterSection(Pos,alpha,_Daten->getEdge(i)));
     }
+*/
+    InterSecQTree(Pos,alpha);
 
-    zCovering.clear();
-    zSort();
-
-    renderPixel value;
-    value.r=0.0;
-    value.g=0.0;
-    value.b=0.0;
-    for(int i = 0; i < zCovering.size(); i++)
+    // Calculate Z-Buffer/the nearest of all intersections
+    double zBuffer = VeryBig;
+    long  BufferI = 0;
+    Coord InterSec;
+    InterSec.x = noInters;
+    InterSec.y = noInters;
+    for(long i = 0; i < InterSections.size(); i++)
     {
-        edge currEdge = _Daten->getEdge(zCovering[i].ObjIndex);
-        value.r += (value.r * i + (abs(zCovering[i].dalpha)/(2.0*pi))*currEdge.r*currEdge.e)/(i+1);
-        value.g += (value.g * i + (abs(zCovering[i].dalpha)/(2.0*pi))*currEdge.g*currEdge.e)/(i+1);
-        value.b += (value.b * i + (abs(zCovering[i].dalpha)/(2.0*pi))*currEdge.b*currEdge.e)/(i+1);
+        if(InterSections[i].x != noInters)
+        {
+            if(zBuffer > sqrt((Pos.x-InterSections[i].x)*(Pos.x-InterSections[i].x)+(Pos.y-InterSections[i].y)*(Pos.y-InterSections[i].y)))
+            {
+            InterSec = InterSections[i];
+            BufferI = InterSections[i].i;
+            zBuffer = sqrt((Pos.x-InterSections[i].x)*(Pos.x-InterSections[i].x)+(Pos.y-InterSections[i].y)*(Pos.y-InterSections[i].y));
+            }
+        }
     }
+    InterSections.clear();
+
+    // Calculate Shader
+        if(_Daten->getEdge(BufferI).e > 0.0)
+        {
+            renderPixel value;
+            value.r = _Daten->getEdge(BufferI).r * _Daten->getEdge(BufferI).e;
+            value.g = _Daten->getEdge(BufferI).g * _Daten->getEdge(BufferI).e;
+            value.b = _Daten->getEdge(BufferI).b * _Daten->getEdge(BufferI).e;
+
+            //Draw Ray into the RgbiImage with the Bresenham from x,y to InterSec.x,InterSec.y
+            //drawRay(Pos,InterSec,value,RgbiImage);
+
+            return value;
+        }//Reflective Material (Diffuse/Specular)
+        else
+        {
+        if((_Daten->getEdge(BufferI).r +_Daten->getEdge(BufferI).g +_Daten->getEdge(BufferI).b) > 0.0)
+        {
+            double normale = atan2(_Daten->getEdge(BufferI).y2 - _Daten->getEdge(BufferI).y1,_Daten->getEdge(BufferI).x2 - _Daten->getEdge(BufferI).x1);
+            normale = radToDeg(normale);
+
+            if(normale < 180 && normale < 360){normale -= 180;}
+
+            if(location(_Daten->getEdge(BufferI).x1,_Daten->getEdge(BufferI).y1,normale+90,Pos)){normale -= 180;}
+
+            double refl = alpha + 2*(normale-alpha);
+            refl = normalize(refl);
+
+            renderPixel value;
+            value = this->trace(InterSec.x,InterSec.y,refl,RgbiImage);
+
+            value.r = value.r * _Daten->getEdge(BufferI).r;
+            value.g = value.g * _Daten->getEdge(BufferI).g;
+            value.b = value.b * _Daten->getEdge(BufferI).b;
+
+            //Draw Ray into the RgbiImage with the Bresenham from x,y to InterSec.x,InterSec.y
+            //drawRay(Pos,InterSec,value,RgbiImage);
+
+            return value;
+        }
+        else //Blackbody Material
+        {
+            renderPixel value;
+            value.r = 0;
+            value.g = 0;
+            value.b = 0;
+
+            //Draw Ray into the RgbiImage with the Bresenham from x,y to InterSec.x,InterSec.y
+            //drawRay(Pos,InterSec,value,RgbiImage);
+
+            return value;
+        }
+        }
+
+    renderPixel value; //This may not be reached
+    value.r = 0;
+    value.g = 0;
+    value.b = 0;
 
     return value;
 }
-
-int raytracer::zSort()
+int raytracer::drawRay(Coord Pos,Coord InterS,renderPixel value,QVector< QVector<renderPixel> > *RgbiImage)
 {
-    int noOverlap = 1;
-    for(int i = 0; i < covering.size(); i++)
-    {
-        int overlap = 0;
-        for(int j = 0; j < covering.size() ; j++)
-        {
-            if(j != i)
-            {
-                overlap = coverOverlap(covering[i],covering[j]);
+    int x = (int)((Pos.x + 1.0) * (_scale/2));
+    int y = _scale - (int)((Pos.y + 1.0) * (_scale/2));
 
-                if(overlap != 0)
+    (*RgbiImage)[y][x].i++;
+    (*RgbiImage)[y][x].r = ((*RgbiImage)[y][x].r * (*RgbiImage)[y][x].i + value.r)/((*RgbiImage)[y][x].i + 1);
+    (*RgbiImage)[y][x].g = ((*RgbiImage)[y][x].g * (*RgbiImage)[y][x].i + value.g)/((*RgbiImage)[y][x].i + 1);
+    (*RgbiImage)[y][x].b = ((*RgbiImage)[y][x].b * (*RgbiImage)[y][x].i + value.b)/((*RgbiImage)[y][x].i + 1);
+}
+
+
+int raytracer::InterSecQTree(Coord Pos,double alpha)
+{
+    SearchNode(Pos,alpha,_QTree->getNode(0));
+    return 0;
+}
+
+int raytracer::SearchNode(Coord Pos,double alpha,node TopNode)
+{
+    edge Ray;
+    Ray.x1 = Pos.x;
+    Ray.y1 = Pos.y;
+    Ray.x2 = Pos.x + cos((alpha/180) * pi) * 10.0;
+    Ray.y2 = Pos.y + sin((alpha/180) * pi) * 10.0;
+
+    for(int i= 0; i < 4; i++)
+    {
+
+        edge Bound;
+        node SubNode = _QTree->getNode(TopNode.SubNIndex[i]);
+        Bound.x1=SubNode.Bounds[0].x1;
+        Bound.y1=SubNode.Bounds[0].y1;
+        Bound.x2=SubNode.Bounds[2].x1;
+        Bound.y2=SubNode.Bounds[2].y1;
+
+        //Coord InterS = IntersecRay(Pos,alpha,Bound);
+        if(IntersecRect(Ray,Bound))
+        {
+            if(SubNode.leaf == true)
+            {
+                for(int j= 0; j < SubNode.EdgeNbr.size(); j++)
                 {
-                    noOverlap = 0;
+                    Coord Inters = InterSection(Pos,alpha,_Daten->getEdge(SubNode.EdgeNbr[j]));
+                    if(Inters.x != noInters)
+                    {
+                        Inters.i = SubNode.EdgeNbr[j];
+                        InterSections.push_back(Inters);
+                    }
                 }
             }
-        }
+            else
+            {
+                SearchNode(Pos,alpha,SubNode);
+            }
+       }
 
-        if(noOverlap == 1)
-        {
-            zCovering.push_back(covering[i]);
-        }
-    }
-
-}
-
-int raytracer::coverOverlap(Cover C1,Cover C2) //If C1.alpha is inside C2 return 1. If C2.alpha is inside C1 return 2. Else return 0
-{
-
-    if(inside(C1.alpha1,C2.alpha1,C2.alpha2)||inside(C1.alpha2,C2.alpha1,C2.alpha2))
-    {
-        return 1;
-    }
-    if(inside(C2.alpha1,C1.alpha1,C1.alpha2)||inside(C2.alpha2,C1.alpha1,C1.alpha2))
-    {
-        return 2;
-    }
-
+     }
     return 0;
 }
 
 
-int  raytracer::getCovering(Coord Pos,int i)
-{
-    edge currEdge = _Daten->getEdge(i);
-
-        Cover currCover;
-        currCover.alpha1 = atan2((Pos.y-currEdge.y1),(Pos.x-currEdge.x1));
-        currCover.alpha2 = atan2((Pos.y-currEdge.y2),(Pos.x-currEdge.x2));
-
-
-
-        currCover.dalpha = currCover.alpha1 - currCover.alpha2;
-        if(currCover.dalpha > pi)
-        {
-
-                currCover.alpha1 = normalize(currCover.alpha1);
-                currCover.alpha2 = normalize(currCover.alpha2);
-
-            currCover.dalpha = currCover.alpha1 - currCover.alpha2;
-        }
-        if(currCover.dalpha < -pi)
-        {
-
-                currCover.alpha1 = normalize(currCover.alpha1);
-                currCover.alpha2 = normalize(currCover.alpha2);
-
-            currCover.dalpha = currCover.alpha1 - currCover.alpha2;
-        }
-
-
-        currCover.ObjIndex = i;
-
-        currCover.z1 = sqrt((Pos.x - currEdge.x1)*(Pos.x - currEdge.x1)+(Pos.y - currEdge.y1)*(Pos.y - currEdge.y1));
-        currCover.z2 = sqrt((Pos.x - currEdge.x2)*(Pos.x - currEdge.x2)+(Pos.y - currEdge.y2)*(Pos.y - currEdge.y1));
-
-        covering.push_back(currCover);
-    return 0;
-}
 
 int raytracer::location(double xG, double yG, double alphaG, Coord Pos)
 {
@@ -144,16 +196,4 @@ int raytracer::location(double xG, double yG, double alphaG, Coord Pos)
 
     if(c >= 0){return 1;}
     else {return 0 ;}
-}
-
-double raytracer::abs(double var)
-{
-    if (var > 0)
-    {
-        return var;
-    }
-    else
-    {
-        return -var;
-    }
 }

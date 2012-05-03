@@ -12,7 +12,7 @@ data::data()
 {
 }
 
-edge data::getEdge(unsigned long ElNumbr)
+edge data::getEdge(long ElNumbr)
 {
     if(ElNumbr < this->getSize())
     {
@@ -35,6 +35,8 @@ int data::loadFile(QString FileName)
 
     QFile myFile(FileName); // Create a file handle for the file
     QString line;
+
+    drawFrame();
 
     if (!myFile.open(QIODevice::ReadOnly | QIODevice::Text)) // Open the file
     {
@@ -88,10 +90,45 @@ int data::loadFile(QString FileName)
         Edges.push_back(BufferEdge);
     }
 
-
-
     myFile.close();   // Datei schlieﬂen
 
+
+    return 0;
+}
+
+int data::drawFrame()
+{
+    edge Frame;
+
+    Frame.r = 0.0;
+    Frame.g = 0.0;
+    Frame.b = 0.0;
+    Frame.e = 0.0;
+    Frame.gl= 0.0;
+
+    Frame.x1 = -0.9999;
+    Frame.y1 = -0.9999;
+    Frame.x2 = 0.9999;
+    Frame.y2 = -0.99991;
+    Edges.push_back(Frame);
+
+    Frame.x1 = 0.9999;
+    Frame.y1 = -0.9999;
+    Frame.x2 = 0.99991;
+    Frame.y2 = 0.9999;
+    Edges.push_back(Frame);
+
+    Frame.x1 = 0.9999;
+    Frame.y1 = 0.9999;
+    Frame.x2 = -0.9999;
+    Frame.y2 = 0.99991;
+    Edges.push_back(Frame);
+
+    Frame.x1 = -0.9999;
+    Frame.y1 = 0.9999;
+    Frame.x2 = -0.99991;
+    Frame.y2 = -0.9999;
+    Edges.push_back(Frame);
 
     return 0;
 }

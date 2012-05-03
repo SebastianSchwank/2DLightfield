@@ -10,7 +10,7 @@
 class renderer
 {
 public:
-    renderer(data *Daten,unsigned long scale);
+    renderer(data *Daten,unsigned long scale, QuadTree *_QTree);
     double renderSp(unsigned long samples);
     QImage getImage();
 

@@ -32,7 +32,13 @@ void MainWindow::on_actionLoadData_activated()
     ui->textEdit->insertPlainText("\n");
     if(!Daten.loadFile(FileName))
     {
+        QString numberOfElements = QString::number(Daten.getSize());
         ui->textEdit->insertPlainText("\n File sucessfully Loaded");
+        ui->textEdit->insertPlainText("\n");
+        ui->textEdit->insertPlainText(numberOfElements);
+        ui->textEdit->insertPlainText(" Elements loaded");
+        QTree = new QuadTree(&Daten);
+        ui->textEdit->insertPlainText("\n QTree sucessfully built");
     }
     else
     {
@@ -50,7 +56,7 @@ void MainWindow::on_actionPreview_triggered()
 {
     preview = new QGraphicsScene();
 
-    viewpreview(Daten,preview,ui->horizontalSlider->value());
+    viewpreview(Daten,QTree,preview,ui->horizontalSlider->value());
 
     ui->graphicsView->setScene(preview);
     ui->graphicsView->show();
@@ -63,7 +69,7 @@ void MainWindow::on_actionNewRender_triggered()
     unsigned long scale;
     scale = ui->horizontalSlider->value();
 
-    RenderTask = new renderer(&Daten,scale);
+    RenderTask = new renderer(&Daten,scale,QTree);
 
     item = new QGraphicsPixmapItem ( QPixmap::fromImage(RenderTask->getImage()));
     render->addItem(item);

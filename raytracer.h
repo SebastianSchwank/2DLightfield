@@ -7,39 +7,34 @@
 #include <QVector>
 #include <rmath.h>
 #include <QLineF>
-//#include <quadtree.h>
+#include <quadtree.h>
+#include <math.h>
 
 
 struct renderPixel
 {
     double r,g,b;
-};
-
-struct Cover
-{
-    double alpha1,alpha2,dalpha;
-    double z1,z2;
-    int ObjIndex;
+    long i;
 };
 
 class raytracer
 {
 public:
-    raytracer(data *Daten,unsigned long scale);
-    renderPixel renderPix(int x,int y);
+    raytracer(data *Daten,unsigned long scale,QuadTree *QTree);
+    renderPixel renderPix(int x,int y,QVector< QVector<renderPixel> > *RgbiImage);
 
 private:
-    renderPixel trace(double x,double y);
+    renderPixel trace(double x,double y,double alpha,QVector< QVector<renderPixel> > *RgbiImage);
+    int drawRay(Coord Pos,Coord InterS,renderPixel value,QVector< QVector<renderPixel> > *RgbiImage);
     int location(double xG, double yG, double alphaG, Coord Pos);
-    int getCovering(Coord Pos, int i);
-    int zSort();
-    int coverOverlap(Cover C1,Cover C2);
-    double abs(double var);
+    int InterSecQTree(Coord Pos,double alpha);
+    int SearchNode(Coord Pos,double alpha, node TopNode);
 
+    QuadTree *_QTree;
     data *_Daten;
     unsigned long _scale;
-    QVector<Cover> covering;
-    QVector<Cover> zCovering;
+    QVector<Coord> InterSections;
+    QVector< QVector<renderPixel> > *_RgbiImage;
 
 };
 

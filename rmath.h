@@ -18,11 +18,12 @@ double radToDeg(double Rad);
 double degToRad(double Deg);
 double normalize(double alpha);
 
+int sgn(int x);
 int inBounds(Coord pos,double xb1,double yb1,double xb2,double yb2);
 int inDirection(double alpha, Coord pos, double x, double y);
 Coord IntersecRay(Coord Ray,double alpha, edge Rect);
 int IntersecRect(edge Ray, edge Rect);
 Coord InterSection(Coord pos,double angle,edge currEdge);
-int inside(double probe,double start,double end);
+
 
 #endif // RMATH_H

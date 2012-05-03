@@ -18,9 +18,12 @@ private:
 
 public:
     data();
-    edge getEdge(unsigned long ElNumbr);
+    edge getEdge(long ElNumbr);
     long getSize();
     int loadFile(QString FileName);
+
+private:
+    int drawFrame();
 
 };
 
