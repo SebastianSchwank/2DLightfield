@@ -35,17 +35,17 @@ double normalize(double alpha)
     return alpha;
 }
 
-int inBounds(Coord pos,double xb1,double yb1,double xb2,double yb2)
+bool inBounds(Coord pos,double xb1,double yb1,double xb2,double yb2)
 {
     if (((pos.x >= xb1) && (pos.x <= xb2)) || ((pos.x <= xb1) && (pos.x >= xb2)))
     {
         if(((pos.y >= yb1) && (pos.y <= yb2)) || ((pos.y <= yb1) && (pos.y >= yb2)))
         {
-            return 1;
+            return true;
         }
     }
 
-    return 0;
+    return false;
 }
 
 int inDirection(double alpha, Coord pos, double x, double y)

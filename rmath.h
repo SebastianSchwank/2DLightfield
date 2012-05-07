@@ -19,7 +19,7 @@ double degToRad(double Deg);
 double normalize(double alpha);
 
 int sgn(int x);
-int inBounds(Coord pos,double xb1,double yb1,double xb2,double yb2);
+bool inBounds(Coord pos,double xb1,double yb1,double xb2,double yb2);
 int inDirection(double alpha, Coord pos, double x, double y);
 Coord IntersecRay(Coord Ray,double alpha, edge Rect);
 int IntersecRect(edge Ray, edge Rect);

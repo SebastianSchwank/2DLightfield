@@ -67,8 +67,8 @@ renderPixel raytracer::trace(double x,double y,double alpha)
     edge Ray;
     Ray.x1 = Pos.x;
     Ray.y1 = Pos.y;
-    Ray.x2 = Pos.x + cos(degToRad(alpha)) * 10.0;
-    Ray.y2 = Pos.y + sin(degToRad(alpha)) * 10.0;
+    Ray.x2 = Pos.x + cos(degToRad(alpha)) * 100.0;
+    Ray.y2 = Pos.y + sin(degToRad(alpha)) * 100.0;
 
     Coord InterSec = _grid.Raytrace(Ray,alpha);
     // Calculate Shader
@@ -99,7 +99,11 @@ renderPixel raytracer::trace(double x,double y,double alpha)
             refl = normalize(refl);
 
             renderPixel value;
-            value = this->trace(InterSec.x,InterSec.y,refl);
+            //value = this->trace(InterSec.x,InterSec.y,refl);
+
+            value.r = 0;
+            value.g = 0;
+            value.b = 0;
 
             value.r = value.r * _Daten->getEdge(InterSec.i).r;
             value.g = value.g * _Daten->getEdge(InterSec.i).g;
