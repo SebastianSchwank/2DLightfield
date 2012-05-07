@@ -7,7 +7,8 @@
 #include <QGraphicsScene>
 #include "data.h"
 #include "quadtree.h"
+#include "bresenhamgrid.h"
 
-void viewpreview(data Daten,QuadTree *QTree, QGraphicsScene *preview,long scale);
+void viewpreview(data Daten,BresenhamGrid grid, QGraphicsScene *preview,long scale);
 
 #endif // PREVIEW_H

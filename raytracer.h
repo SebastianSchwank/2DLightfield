@@ -9,6 +9,7 @@
 #include <QLineF>
 #include <quadtree.h>
 #include <math.h>
+#include <bresenhamgrid.h>
 
 
 struct renderPixel
@@ -20,17 +21,15 @@ struct renderPixel
 class raytracer
 {
 public:
-    raytracer(data *Daten,unsigned long scale,QuadTree *QTree);
+    raytracer(data *Daten,unsigned long scale,BresenhamGrid grid);
     renderPixel renderPix(int x,int y,QVector< QVector<renderPixel> > *RgbiImage);
 
 private:
     renderPixel trace(double x,double y,double alpha,QVector< QVector<renderPixel> > *RgbiImage);
     int drawRay(Coord Pos,Coord InterS,renderPixel value,QVector< QVector<renderPixel> > *RgbiImage);
     int location(double xG, double yG, double alphaG, Coord Pos);
-    int InterSecQTree(Coord Pos,double alpha);
-    int SearchNode(Coord Pos,double alpha, node TopNode);
 
-    QuadTree *_QTree;
+    BresenhamGrid _grid;
     data *_Daten;
     unsigned long _scale;
     QVector<Coord> InterSections;

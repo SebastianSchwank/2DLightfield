@@ -3,12 +3,12 @@
 
 static unsigned int xi;
 
-renderer::renderer(data *Daten,unsigned long scale,QuadTree *_QTree)
+renderer::renderer(data *Daten,unsigned long scale,BresenhamGrid grid)
 {
     _Daten = Daten;
     _RenderOut = new QImage ( scale, scale, QImage::Format_RGB32);
     _scale = scale;
-    RenderTask = new raytracer(_Daten,_scale,_QTree);
+    RenderTask = new raytracer(_Daten,_scale,grid);
     QRgb value;
     value = qRgb(0, 0, 0); // Fill the whole image Black
     _RenderOut->fill(value);
@@ -26,17 +26,17 @@ renderer::renderer(data *Daten,unsigned long scale,QuadTree *_QTree)
         }
         RgbiImage.push_back(Row);
     }
-    xi = 1;
+    xi = 5;
 }
 
 double renderer::renderSp(unsigned long samples)
 {
     double time = 0;
 
-    while(xi < _scale-1)
+    while(xi < _scale-5)
     {
         //#pragma omp parallel for
-        for(unsigned int y = 1;y < _scale-1; y++)
+        for(unsigned int y = 5;y < _scale-5; y++)
         {
             renderPixel value;
 
@@ -71,7 +71,7 @@ double renderer::renderSp(unsigned long samples)
         }
 
     }
-    xi = 1;
+    xi = 5;
     return time;
 }
 

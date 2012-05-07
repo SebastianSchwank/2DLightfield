@@ -17,7 +17,7 @@ SOURCES += main.cpp\
     preview.cpp \
     data.cpp \
     rmath.cpp \
-    quadtree.cpp
+    bresenhamgrid.cpp
 
 HEADERS  += mainwindow.h \
     render.h \
@@ -25,7 +25,7 @@ HEADERS  += mainwindow.h \
     preview.h \
     data.h \
     rmath.h \
-    quadtree.h
+    bresenhamgrid.h
 
 FORMS    += mainwindow.ui
 

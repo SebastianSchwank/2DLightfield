@@ -7,11 +7,11 @@ const double VeryBig = 2e10;
 const double noInters = -2.0;
 const double pi = 3.14159265;
 
-raytracer::raytracer(data *Daten,unsigned long scale,QuadTree *QTree)
+raytracer::raytracer(data *Daten,unsigned long scale,BresenhamGrid grid)
 {
     _Daten = Daten;
     _scale = scale;
-    _QTree = QTree;
+    _grid  = grid;
 }
 
 renderPixel raytracer::renderPix(int x,int y, QVector<QVector<renderPixel> > *RgbiImage)
@@ -41,8 +41,8 @@ renderPixel raytracer::trace(double x,double y,double alpha,QVector< QVector<ren
     {
         InterSections.append(InterSection(Pos,alpha,_Daten->getEdge(i)));
     }
-*/
-    InterSecQTree(Pos,alpha);
+
+    //InterSecQTree(Pos,alpha);
 
     // Calculate Z-Buffer/the nearest of all intersections
     double zBuffer = VeryBig;
@@ -63,14 +63,21 @@ renderPixel raytracer::trace(double x,double y,double alpha,QVector< QVector<ren
         }
     }
     InterSections.clear();
+*/
+    edge Ray;
+    Ray.x1 = Pos.x;
+    Ray.y1 = Pos.y;
+    Ray.x2 = Pos.x + cos(alpha) * 10.0;
+    Ray.y2 = Pos.y + sin(alpha) * 10.0;
 
+    Coord InterSec = _grid.Raytrace(Ray,alpha);
     // Calculate Shader
-        if(_Daten->getEdge(BufferI).e > 0.0)
+        if(_Daten->getEdge(InterSec.i).e > 0.0)
         {
             renderPixel value;
-            value.r = _Daten->getEdge(BufferI).r * _Daten->getEdge(BufferI).e;
-            value.g = _Daten->getEdge(BufferI).g * _Daten->getEdge(BufferI).e;
-            value.b = _Daten->getEdge(BufferI).b * _Daten->getEdge(BufferI).e;
+            value.r = _Daten->getEdge(InterSec.i).r * _Daten->getEdge(InterSec.i).e;
+            value.g = _Daten->getEdge(InterSec.i).g * _Daten->getEdge(InterSec.i).e;
+            value.b = _Daten->getEdge(InterSec.i).b * _Daten->getEdge(InterSec.i).e;
 
             //Draw Ray into the RgbiImage with the Bresenham from x,y to InterSec.x,InterSec.y
             //drawRay(Pos,InterSec,value,RgbiImage);
@@ -79,14 +86,14 @@ renderPixel raytracer::trace(double x,double y,double alpha,QVector< QVector<ren
         }//Reflective Material (Diffuse/Specular)
         else
         {
-        if((_Daten->getEdge(BufferI).r +_Daten->getEdge(BufferI).g +_Daten->getEdge(BufferI).b) > 0.0)
+        if((_Daten->getEdge(InterSec.i).r +_Daten->getEdge(InterSec.i).g +_Daten->getEdge(InterSec.i).b) > 0.0)
         {
-            double normale = atan2(_Daten->getEdge(BufferI).y2 - _Daten->getEdge(BufferI).y1,_Daten->getEdge(BufferI).x2 - _Daten->getEdge(BufferI).x1);
+            double normale = atan2(_Daten->getEdge(InterSec.i).y2 - _Daten->getEdge(InterSec.i).y1,_Daten->getEdge(InterSec.i).x2 - _Daten->getEdge(InterSec.i).x1);
             normale = radToDeg(normale);
 
             if(normale < 180 && normale < 360){normale -= 180;}
 
-            if(location(_Daten->getEdge(BufferI).x1,_Daten->getEdge(BufferI).y1,normale+90,Pos)){normale -= 180;}
+            if(location(_Daten->getEdge(InterSec.i).x1,_Daten->getEdge(InterSec.i).y1,normale+90,Pos)){normale -= 180;}
 
             double refl = alpha + 2*(normale-alpha);
             refl = normalize(refl);
@@ -94,9 +101,9 @@ renderPixel raytracer::trace(double x,double y,double alpha,QVector< QVector<ren
             renderPixel value;
             value = this->trace(InterSec.x,InterSec.y,refl,RgbiImage);
 
-            value.r = value.r * _Daten->getEdge(BufferI).r;
-            value.g = value.g * _Daten->getEdge(BufferI).g;
-            value.b = value.b * _Daten->getEdge(BufferI).b;
+            value.r = value.r * _Daten->getEdge(InterSec.i).r;
+            value.g = value.g * _Daten->getEdge(InterSec.i).g;
+            value.b = value.b * _Daten->getEdge(InterSec.i).b;
 
             //Draw Ray into the RgbiImage with the Bresenham from x,y to InterSec.x,InterSec.y
             //drawRay(Pos,InterSec,value,RgbiImage);
@@ -133,56 +140,6 @@ int raytracer::drawRay(Coord Pos,Coord InterS,renderPixel value,QVector< QVector
     (*RgbiImage)[y][x].r = ((*RgbiImage)[y][x].r * (*RgbiImage)[y][x].i + value.r)/((*RgbiImage)[y][x].i + 1);
     (*RgbiImage)[y][x].g = ((*RgbiImage)[y][x].g * (*RgbiImage)[y][x].i + value.g)/((*RgbiImage)[y][x].i + 1);
     (*RgbiImage)[y][x].b = ((*RgbiImage)[y][x].b * (*RgbiImage)[y][x].i + value.b)/((*RgbiImage)[y][x].i + 1);
-}
-
-
-int raytracer::InterSecQTree(Coord Pos,double alpha)
-{
-    SearchNode(Pos,alpha,_QTree->getNode(0));
-    return 0;
-}
-
-int raytracer::SearchNode(Coord Pos,double alpha,node TopNode)
-{
-    edge Ray;
-    Ray.x1 = Pos.x;
-    Ray.y1 = Pos.y;
-    Ray.x2 = Pos.x + cos((alpha/180) * pi) * 10.0;
-    Ray.y2 = Pos.y + sin((alpha/180) * pi) * 10.0;
-
-    for(int i= 0; i < 4; i++)
-    {
-
-        edge Bound;
-        node SubNode = _QTree->getNode(TopNode.SubNIndex[i]);
-        Bound.x1=SubNode.Bounds[0].x1;
-        Bound.y1=SubNode.Bounds[0].y1;
-        Bound.x2=SubNode.Bounds[2].x1;
-        Bound.y2=SubNode.Bounds[2].y1;
-
-        //Coord InterS = IntersecRay(Pos,alpha,Bound);
-        if(IntersecRect(Ray,Bound))
-        {
-            if(SubNode.leaf == true)
-            {
-                for(int j= 0; j < SubNode.EdgeNbr.size(); j++)
-                {
-                    Coord Inters = InterSection(Pos,alpha,_Daten->getEdge(SubNode.EdgeNbr[j]));
-                    if(Inters.x != noInters)
-                    {
-                        Inters.i = SubNode.EdgeNbr[j];
-                        InterSections.push_back(Inters);
-                    }
-                }
-            }
-            else
-            {
-                SearchNode(Pos,alpha,SubNode);
-            }
-       }
-
-     }
-    return 0;
 }
 
 

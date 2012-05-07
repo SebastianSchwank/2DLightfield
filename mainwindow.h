@@ -6,7 +6,6 @@
 #include "data.h"
 #include "preview.h"
 #include "render.h"
-#include "quadtree.h"
 
 
 namespace Ui {
@@ -42,7 +41,7 @@ private:
     bool renderRunning;
     unsigned long samples;
     QString AppSpP;
-    QuadTree *QTree;
+    BresenhamGrid grid;
 };
 
 #endif // MAINWINDOW_H

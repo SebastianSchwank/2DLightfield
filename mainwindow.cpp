@@ -37,8 +37,8 @@ void MainWindow::on_actionLoadData_activated()
         ui->textEdit->insertPlainText("\n");
         ui->textEdit->insertPlainText(numberOfElements);
         ui->textEdit->insertPlainText(" Elements loaded");
-        QTree = new QuadTree(&Daten);
-        ui->textEdit->insertPlainText("\n QTree sucessfully built");
+        grid.setGrid(&Daten);
+        ui->textEdit->insertPlainText("\n BresenhamGrid sucessfully built");
     }
     else
     {
@@ -56,7 +56,7 @@ void MainWindow::on_actionPreview_triggered()
 {
     preview = new QGraphicsScene();
 
-    viewpreview(Daten,QTree,preview,ui->horizontalSlider->value());
+    viewpreview(Daten,grid,preview,ui->horizontalSlider->value());
 
     ui->graphicsView->setScene(preview);
     ui->graphicsView->show();
@@ -69,7 +69,7 @@ void MainWindow::on_actionNewRender_triggered()
     unsigned long scale;
     scale = ui->horizontalSlider->value();
 
-    RenderTask = new renderer(&Daten,scale,QTree);
+    RenderTask = new renderer(&Daten,scale,grid);
 
     item = new QGraphicsPixmapItem ( QPixmap::fromImage(RenderTask->getImage()));
     render->addItem(item);

@@ -14,7 +14,7 @@ data::data()
 
 edge data::getEdge(long ElNumbr)
 {
-    if(ElNumbr < this->getSize())
+    if(ElNumbr < this->getSize() || ElNumbr > 0)
     {
         return Edges[ElNumbr];
     }

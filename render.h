@@ -6,11 +6,12 @@
 #include <raytracer.h>
 #include <qmath.h>
 #include <QCoreApplication>
+#include <bresenhamgrid.h>
 
 class renderer
 {
 public:
-    renderer(data *Daten,unsigned long scale, QuadTree *_QTree);
+    renderer(data *Daten,unsigned long scale, BresenhamGrid grid);
     double renderSp(unsigned long samples);
     QImage getImage();
 
