@@ -37,9 +37,9 @@ double normalize(double alpha)
 
 int inBounds(Coord pos,double xb1,double yb1,double xb2,double yb2)
 {
-    if (((pos.x > xb1) && (pos.x < xb2)) || ((pos.x < xb1) && (pos.x > xb2)))
+    if (((pos.x >= xb1) && (pos.x <= xb2)) || ((pos.x <= xb1) && (pos.x >= xb2)))
     {
-        if(((pos.y > yb1) && (pos.y < yb2)) || ((pos.y < yb1) && (pos.y > yb2)))
+        if(((pos.y >= yb1) && (pos.y <= yb2)) || ((pos.y <= yb1) && (pos.y >= yb2)))
         {
             return 1;
         }
@@ -140,7 +140,7 @@ Coord InterSection(Coord pos,double angle,edge currEdge)
     Intersec.y = pos.y + v * m1;
 
 
-    if(inBounds(Intersec,pos.x-0.001,pos.y-0.001,pos.x+0.001,pos.y+0.001))
+    if(inBounds(Intersec,pos.x-0.0001,pos.y-0.0001,pos.x+0.0001,pos.y+0.0001))
     {
         Intersec.x = noInters;
         Intersec.y = noInters;

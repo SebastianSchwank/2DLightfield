@@ -4,7 +4,6 @@
 #include <rmath.h>
 #include <data.h>
 
-
 #include <QVector>
 
 const int gridSize = 64;
@@ -20,7 +19,7 @@ public:
 private:
     int sgn(int x);
     QVector<long long> grid;
-    QVector<int> edgeNumber[64][64];
+    QVector<int> *edgeNumber[gridSize][gridSize];
     data *_Daten;
 };
 

@@ -26,17 +26,17 @@ renderer::renderer(data *Daten,unsigned long scale,BresenhamGrid grid)
         }
         RgbiImage.push_back(Row);
     }
-    xi = 5;
+    xi = 15;
 }
 
 double renderer::renderSp(unsigned long samples)
 {
     double time = 0;
 
-    while(xi < _scale-5)
+    while(xi < _scale-15)
     {
         //#pragma omp parallel for
-        for(unsigned int y = 5;y < _scale-5; y++)
+        for(unsigned int y = 15;y < _scale-15; y++)
         {
             renderPixel value;
 
@@ -49,7 +49,7 @@ double renderer::renderSp(unsigned long samples)
 
         xi++;
 
-        if(xi % samples == 0 && xi < _scale-5)
+        if(xi % samples == 0 && xi < _scale-15)
         {
             for(int x = 0; x < _scale; x++)
             {
@@ -61,7 +61,7 @@ double renderer::renderSp(unsigned long samples)
                 }
             }
 
-            for(unsigned int y = 5; y < _scale-5; y++)
+            for(unsigned int y = 15; y < _scale-15; y++)
             {
                 QRgb RgbVal;
                 RgbVal = qRgb(255,0,0);
@@ -71,7 +71,7 @@ double renderer::renderSp(unsigned long samples)
         }
 
     }
-    xi = 5;
+    xi = 15;
     return time;
 }
 

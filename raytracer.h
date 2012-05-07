@@ -25,7 +25,7 @@ public:
     renderPixel renderPix(int x,int y,QVector< QVector<renderPixel> > *RgbiImage);
 
 private:
-    renderPixel trace(double x,double y,double alpha,QVector< QVector<renderPixel> > *RgbiImage);
+    renderPixel trace(double x,double y,double alpha);
     int drawRay(Coord Pos,Coord InterS,renderPixel value,QVector< QVector<renderPixel> > *RgbiImage);
     int location(double xG, double yG, double alphaG, Coord Pos);
 

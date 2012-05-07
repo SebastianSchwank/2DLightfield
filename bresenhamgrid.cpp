@@ -9,17 +9,24 @@ BresenhamGrid::BresenhamGrid()
     {
         grid.push_back(line);
     }
+
+    for(int x = 0; x < 64; x++)
+    {
+        for(int y = 0; y < 64; y++)
+        {
+            edgeNumber[y][x] = new QVector<int>;
+        }
+    }
 }
 
 Coord BresenhamGrid::Raytrace(edge Ray,double alpha)
 {
-    Coord Intersection;
 
     int xstart,ystart,xend,yend;
-    xstart = (Ray.x1 + 1.0)/2 * gridSize;
-    ystart = (Ray.y1 + 1.0)/2 * gridSize;
-    xend = (Ray.x2 + 1.0)/2 * gridSize;
-    yend = (Ray.y2 + 1.0)/2 * gridSize;
+    xstart = ((Ray.x1 + 1.0)/2) * gridSize;
+    ystart = ((Ray.y1 + 1.0)/2) * gridSize;
+    xend = ((Ray.x2 + 1.0)/2) * gridSize;
+    yend = ((Ray.y2 + 1.0)/2) * gridSize;
 
     int x, y, t, dx, dy, incx, incy, pdx, pdy, ddx, ddy, es, el, err;
 
@@ -55,16 +62,18 @@ Coord BresenhamGrid::Raytrace(edge Ray,double alpha)
 
        if(getGrid(x,y))
        {
-           for(int i = 0;i < edgeNumber[y][x].size(); i++)
+           for(int i = 0;i < edgeNumber[y][x]->size(); i++)
            {
                Coord currPos;
                currPos.x = Ray.x1;
-               currPos.y = Ray.y2;
+               currPos.y = Ray.y1;
 
                edge currEdge;
-               currEdge = _Daten->getEdge(edgeNumber[y][x][i]);
+               currEdge = _Daten->getEdge(edgeNumber[y][x]->at(i));
 
+               Coord Intersection;
                Intersection = InterSection(currPos,alpha,currEdge);
+               Intersection.i = edgeNumber[y][x]->at(i);
                if(inBounds(Intersection,x/(gridSize/2.0)-1.0,y/(gridSize/2.0)-1.0,(x+1)/(gridSize/2.0)-1.0,(y+1)/(gridSize/2.0)-1.0))
                {
                      return Intersection;
@@ -91,20 +100,23 @@ Coord BresenhamGrid::Raytrace(edge Ray,double alpha)
               y += pdy;
           }
 
-          if(getGrid(x,y))
+          if(getGrid(x,y)) //Test if Sth. is inside the current Grid Position
           {
-              for(int i = 0;i < edgeNumber[y][x].size(); i++)
+              for(int i = 0;i < edgeNumber[y][x]->size(); i++)  //Test Intersection with the Objects inside the Grid
               {
                   Coord currPos;
                   currPos.x = Ray.x1;
-                  currPos.y = Ray.y2;
+                  currPos.y = Ray.y1;
 
                   edge currEdge;
-                  currEdge = _Daten->getEdge(edgeNumber[y][x][i]);
+                  currEdge = _Daten->getEdge(edgeNumber[y][x]->at(i));
 
+                  Coord Intersection;
                   Intersection = InterSection(currPos,alpha,currEdge);
-                  Intersection.i = edgeNumber[y][x][i];
-                  //if(inBounds(Intersection,x/(gridSize/2.0)-1.0,y/(gridSize/2.0)-1.0,(x+1)/(gridSize/2.0)-1.0,(y+1)/(gridSize/2.0)-1.0))
+                  Intersection.i = edgeNumber[y][x]->at(i);
+
+                  //if(inBounds(Intersection,x/(gridSize/2.0)-1.0,y/(gridSize/2.0)-1.0,(x+1.0)/(gridSize/2.0)-1.0,(y+1.0)/(gridSize/2.0)-1.0))
+                  if(Intersection.x != 2.0)
                   {
                         return Intersection;
                   }
@@ -112,12 +124,13 @@ Coord BresenhamGrid::Raytrace(edge Ray,double alpha)
           }
        } /* gbham() */
 
-       Intersection.i = 0;
-       return Intersection;
+       //This may not be reached
 }
 
 void BresenhamGrid::setGrid(data *Daten)
 {
+    _Daten = Daten;
+
     for(int x = 0; x < gridSize; x++)
     {
         for(int y = 0; y < gridSize; y++)
@@ -141,7 +154,7 @@ void BresenhamGrid::setGrid(data *Daten)
                     mask = mask << x;
                     grid[y] = grid[y] | mask;
 
-                    edgeNumber[y][x].push_back(i);
+                    edgeNumber[y][x]->push_back(i);
                 }
             }
         }

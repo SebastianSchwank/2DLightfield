@@ -29,8 +29,8 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui
 
-CONFIG   += -Wall -O2 -st
+CONFIG   += -Wall -O2
 
-LIBS += -fopenmp
+#LIBS += -fopenmp
 
-QMAKE_CXXFLAGS += -fopenmp
+#QMAKE_CXXFLAGS += -fopenmp

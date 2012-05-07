@@ -14,7 +14,7 @@ data::data()
 
 edge data::getEdge(long ElNumbr)
 {
-    if(ElNumbr < this->getSize() || ElNumbr > 0)
+    if((ElNumbr < this->getSize()) && (ElNumbr >= 0))
     {
         return Edges[ElNumbr];
     }
@@ -36,12 +36,12 @@ int data::loadFile(QString FileName)
     QFile myFile(FileName); // Create a file handle for the file
     QString line;
 
-    drawFrame();
-
     if (!myFile.open(QIODevice::ReadOnly | QIODevice::Text)) // Open the file
     {
         return 1;
     }
+
+    drawFrame();
 
     QTextStream stream( &myFile ); // Set the stream to read from myFile
     while (!stream.atEnd()){

@@ -26,10 +26,10 @@ renderPixel raytracer::renderPix(int x,int y, QVector<QVector<renderPixel> > *Rg
 
     alpha = (double)(qrand() % 3600) / 10;
 
-    return trace(xp,yp,alpha,RgbiImage);
+    return trace(xp,yp,alpha);
 }
 
-renderPixel raytracer::trace(double x,double y,double alpha,QVector< QVector<renderPixel> > *RgbiImage)
+renderPixel raytracer::trace(double x,double y,double alpha)
 {
     Coord Pos;
 
@@ -67,8 +67,8 @@ renderPixel raytracer::trace(double x,double y,double alpha,QVector< QVector<ren
     edge Ray;
     Ray.x1 = Pos.x;
     Ray.y1 = Pos.y;
-    Ray.x2 = Pos.x + cos(alpha) * 10.0;
-    Ray.y2 = Pos.y + sin(alpha) * 10.0;
+    Ray.x2 = Pos.x + cos(degToRad(alpha)) * 10.0;
+    Ray.y2 = Pos.y + sin(degToRad(alpha)) * 10.0;
 
     Coord InterSec = _grid.Raytrace(Ray,alpha);
     // Calculate Shader
@@ -99,14 +99,11 @@ renderPixel raytracer::trace(double x,double y,double alpha,QVector< QVector<ren
             refl = normalize(refl);
 
             renderPixel value;
-            value = this->trace(InterSec.x,InterSec.y,refl,RgbiImage);
+            value = this->trace(InterSec.x,InterSec.y,refl);
 
             value.r = value.r * _Daten->getEdge(InterSec.i).r;
             value.g = value.g * _Daten->getEdge(InterSec.i).g;
             value.b = value.b * _Daten->getEdge(InterSec.i).b;
-
-            //Draw Ray into the RgbiImage with the Bresenham from x,y to InterSec.x,InterSec.y
-            //drawRay(Pos,InterSec,value,RgbiImage);
 
             return value;
         }
@@ -131,6 +128,7 @@ renderPixel raytracer::trace(double x,double y,double alpha,QVector< QVector<ren
 
     return value;
 }
+
 int raytracer::drawRay(Coord Pos,Coord InterS,renderPixel value,QVector< QVector<renderPixel> > *RgbiImage)
 {
     int x = (int)((Pos.x + 1.0) * (_scale/2));
